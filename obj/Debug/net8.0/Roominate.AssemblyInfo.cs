@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Roominate")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("4.0.0.23310")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("4.0.0.23310+ce76027ce7d858b3186da4a82fc3d5b64abb8ac0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("4.0.0.23310")]
 [assembly: System.Reflection.AssemblyProductAttribute("Roominate")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Roominate")]
 [assembly: System.Reflection.AssemblyVersionAttribute("4.0.0.23310")]
