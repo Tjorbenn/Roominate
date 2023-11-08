@@ -1,14 +1,13 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-using Roominate.Components;
 using Microsoft.FluentUI.AspNetCore.Components;
+using Roominate.Components;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddFluentUIComponents();
 builder.Services.AddHttpClient();
 
 var app = builder.Build();

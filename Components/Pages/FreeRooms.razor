@@ -12,8 +12,17 @@
 @if (allFreeRooms == null)
 {
     <h4>Kommuniziere mit UnivIS...</h4>
-    <div class="spinner"></div>
+    <FluentProgressRing></FluentProgressRing>
+
+    <FluentCard Class="card-padding">
+        <FluentSkeleton Shape="SkeletonShape.Circle" Shimmer="true"></FluentSkeleton>
+        <FluentSkeleton Height="10px" Shimmer="true"></FluentSkeleton>
+        <FluentSkeleton Height="10px" Shimmer="true"></FluentSkeleton>
+        <FluentSkeleton Height="10px" Shimmer="true"></FluentSkeleton>
+        <FluentSkeleton Width="75px" Height="30px" Shimmer="true"></FluentSkeleton>
+    </FluentCard>
 }
+
 else if (allFreeRooms != null)
 {
     foreach (FreeRoom room in allFreeRooms)

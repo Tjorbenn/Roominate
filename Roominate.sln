@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34227.203
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roominate", "Roominate.csproj", "{471A9C3E-A262-48ED-8D00-9BF84A32B5E1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roominate", "Roominate.csproj", "{B984C527-8856-40C8-BBA6-019940BF774B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{471A9C3E-A262-48ED-8D00-9BF84A32B5E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{471A9C3E-A262-48ED-8D00-9BF84A32B5E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{471A9C3E-A262-48ED-8D00-9BF84A32B5E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{471A9C3E-A262-48ED-8D00-9BF84A32B5E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B984C527-8856-40C8-BBA6-019940BF774B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B984C527-8856-40C8-BBA6-019940BF774B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B984C527-8856-40C8-BBA6-019940BF774B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B984C527-8856-40C8-BBA6-019940BF774B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {C1F202C0-F41F-4C0E-AB1C-97CAC86FFB8C}
+		SolutionGuid = {5550EAA5-89AB-431D-9E2B-E8F0F0F1EA60}
 	EndGlobalSection
 EndGlobal
