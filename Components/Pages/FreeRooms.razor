@@ -1,0 +1,244 @@
+﻿@inject HttpClient httpClient
+
+@using System.Xml
+@using System.Xml.Linq
+@using System.Net
+@using System.Net.Http
+@using System.Web
+@using Microsoft.Extensions.Http
+
+@if (allFreeRooms == null)
+{
+    <h4>Kommuniziere mit UnivIS...</h4>
+    <div class="spinner"></div>
+}
+else if (allFreeRooms != null)
+{
+    foreach (FreeRoom room in allFreeRooms)
+    {
+        <h4> @room.name </h4>
+        <p>key: @room.key </p>
+        <p>id: @room.id </p>
+        <p>Shortname: @room.shortName </p>
+        <p>Frei ab: @room.freeFrom </p>
+        <p>Frei bis: @room.freeUntil </p>
+    }
+}
+
+@code
+{
+
+    private List<FreeRoom>? allFreeRooms;
+
+    protected override async Task OnInitializedAsync()
+    {
+        DateTime date = DateTime.Now;
+        allFreeRooms = await GetAllFreeRooms(date);
+    }
+
+    public static string allRoomsEndpoint = "https://univis.uni-luebeck.de/form?__s=1&dsc=anew%2Funihd&donedef=1&search=tel&submitimg-Search=anew%2Funihd-topnav%3Aanew%2Funihd%3Asearch&semto=2023w&submitimg-Semester=anew%2Funihd-topnav%3Aanew%2Funihd%3Asetsem&setsem_jump=anew%2Ftimedout&done-anew%2Ftimedout%3Adoit=++Trotzdem+versuchen++&%3A%3Atarget=anew%2Fxml%3Adoit&db=Room&level=1&sem=2023w&keys=zentr%2Fzentr%2Fzentr%2Fam1%2C%2Ftests2%2C%2Ftest3%2C%2Fam4%2C%2Famfoye%2C%2Ftesta1%2C%2Ftests2_4%2C%2Fams3%2C%2Fams4%2C%2Fc1s01%2C%2Fc1s02%2C%2Fc1s03%2C%2Fc1s04%2C%2Fc2s01%2C%2Fc2s02%2C%2Fc2s03%2C%2Fc2s04%2C%2Fc3s01%2C%2Fc3s02%2C%2Fc4s01%2C%2Fc4s02%2C%2Fc4s03%2C%2Fc4s04%2C%2Ffoyerv%2C%2F1%2C%2F4%2C%2F4a%2C%2Fkt%2C%2Fmfc9s0%2C%2Fmfc9s0_4%2C%2Fmfc9s0_32%2C%2Fmfc9s0_2%2C%2Fmfc9s0_5%2C%2Fmfc9s0_1%2C%2Fmfc9s0_9%2C%2Foasync%2C%2Fosync%2C%2Fr60zkl%2C%2Fs3b%2C%2Fs11c%2C%2Fs20c%2C%2Fsemvor%2C%2Fkeller%2C%2Ft1%2C%2Ffoyert%2C%2Fts1%2C%2Fts2%2C%2Fv1%2C%2Fv2%2C%2Fz12%2C%2Fz3&anonymous=1&__e=667";
+
+    public static string allocationEndpoint = "https://univis.uni-luebeck.de/prg?";
+
+    public async Task<XDocument> GetXml(string endpoint)
+    {
+        var client = new HttpClient();
+        var response = await client.GetAsync(endpoint);
+        response.EnsureSuccessStatusCode();
+        var xmlString = await response.Content.ReadAsStringAsync();
+        if (isValidXml(xmlString))
+        {
+            XDocument xmlFile = XDocument.Parse(xmlString);
+            return xmlFile;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public bool isValidXml(string xmlString)
+    {
+        bool isValidXml = true;
+        try
+        {
+            XDocument.Parse(xmlString);
+        }
+        catch (XmlException)
+        {
+            isValidXml = false;
+        }
+        return isValidXml;
+    }
+
+    public async Task<List<Room>> GetAllRooms()
+    {
+        XDocument allRoomsXml = await GetXml(allRoomsEndpoint);
+        List<Room> allRooms = Room.ExtractRooms(allRoomsXml);
+        return allRooms;
+    }
+
+    public async Task<List<Allocation>> GetAllocationsOnDay(Room room, DateTime date)
+    {
+        string dateToday = date.ToString("yyyy-MM-dd");
+
+        var builder = new UriBuilder(allocationEndpoint);
+        builder.Port = -1;
+        var parameters = HttpUtility.ParseQueryString(string.Empty);
+        parameters["search"] = "allocations";
+        parameters["room"] = room.name;
+        parameters["start"] = dateToday;
+        parameters["end"] = dateToday;
+        parameters["show"] = "xml";
+        builder.Query = parameters.ToString();
+        string url = builder.ToString();
+
+        XDocument xml = await GetXml(url);
+        if (xml != null)
+        {
+            List<Allocation> allAllocations = Allocation.ExtractAllocations(xml, room);
+            return allAllocations;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public async Task<List<FreeRoom>> GetAllFreeRooms(DateTime date)
+    {
+        List<Room> allRooms = await GetAllRooms();
+        List<FreeRoom> allFreeRooms = new List<FreeRoom>();
+
+        foreach (Room room in allRooms)
+        {
+            List<Allocation> roomAllAllocations = await GetAllocationsOnDay(room, date);
+
+            if (roomAllAllocations != null)
+            {
+                bool isFree = true;
+                foreach (Allocation allocation in roomAllAllocations)
+                {
+                    if (date >= allocation.startTime && date <= allocation.endTime)
+                    {
+                        isFree = false;
+                    }
+                }
+
+                if (isFree == true)
+                {
+                    DateTime last = DateTime.MinValue;
+                    DateTime next = DateTime.MaxValue;
+                    foreach (Allocation allocation in roomAllAllocations)
+                    {
+                        if (allocation.endTime > last && allocation.endTime < date)
+                        {
+                            last = allocation.endTime;
+                        }
+                        if (allocation.startTime < next && allocation.startTime > date)
+                        {
+                            next = allocation.startTime;
+                        }
+                    }
+                    FreeRoom freeRoom = new FreeRoom(room, last, next);
+                    allFreeRooms.Add(freeRoom);
+                }
+            }
+        }
+        return allFreeRooms;
+    }
+
+    public class Room
+    {
+        public string key { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
+        public string shortName { get; set; }
+
+        public Room(string newKey, int newId, string newName, string newShortName)
+        {
+            key = newKey;
+            id = newId;
+            name = newName;
+            shortName = newShortName;
+        }
+
+        private static Room CreateRoomFromXElement(XElement element)
+        {
+            string key = element.Attribute("key").Value;
+            int id = int.Parse(element.Element("id").Value);
+            string name = element.Element("name").Value;
+            string shortName = element.Element("short").Value;
+
+            Room room = new Room(key, id, name, shortName);
+            return room;
+        }
+
+        public static List<Room> ExtractRooms(XDocument xml)
+        {
+            IEnumerable<XElement> roomElements = xml.Descendants("Room");
+            List<Room> rooms = new List<Room>();
+
+            foreach (XElement room in roomElements)
+            {
+                rooms.Add(CreateRoomFromXElement(room));
+            }
+
+            return rooms;
+        }
+    }
+
+    public class Allocation
+    {
+        public string roomName { get; set; }
+        public DateTime startTime { get; set; }
+        public DateTime endTime { get; set; }
+
+        public Allocation(string newRoomName, DateTime newStartTime, DateTime newEndTime)
+        {
+            roomName = newRoomName;
+            startTime = newStartTime;
+            endTime = newEndTime;
+        }
+
+        private static Allocation CreateAllocationFromXElement(XElement element, Room room)
+        {
+            string roomName = room.name;
+            DateTime startTime = DateTime.ParseExact(element.Element("starttime").Value, "H:mm", null, System.Globalization.DateTimeStyles.None);
+            DateTime endTime = DateTime.ParseExact(element.Element("endtime").Value, "H:mm", null, System.Globalization.DateTimeStyles.None);
+
+            Allocation allocation = new Allocation(roomName, startTime, endTime);
+            return allocation;
+        }
+
+        public static List<Allocation> ExtractAllocations(XDocument xml, Room room)
+        {
+            IEnumerable<XElement> allocationElements = xml.Descendants("Allocation");
+            List<Allocation> allocations = new List<Allocation>();
+
+            foreach (XElement allocation in allocationElements)
+            {
+                allocations.Add(CreateAllocationFromXElement(allocation, room));
+            }
+            return allocations;
+        }
+    }
+
+    public class FreeRoom : Room
+    {
+        public DateTime freeFrom { get; set; }
+        public DateTime freeUntil { get; set; }
+
+        public FreeRoom(string newKey, int newId, string newName, string newShortName, DateTime newFreeFrom, DateTime newFreeUntil) : base (newKey, newId, newName, newShortName)
+        {
+            freeFrom = newFreeFrom;
+            freeUntil = newFreeUntil;
+        }
+
+        public FreeRoom(Room room, DateTime newFreeFrom, DateTime newFreeUntil) : base(room.key, room.id, room.name, room.shortName)
+        {
+            freeFrom = newFreeFrom;
+            freeUntil = newFreeUntil;
+        }
+    }
+}
