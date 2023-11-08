@@ -8,7 +8,6 @@
 @using System.Net.Http
 @using System.Web
 @using Microsoft.Extensions.Http
-@using Microsoft.Fast.Components.FluentUI
 
 @if (allFreeRooms == null)
 {
@@ -19,12 +18,16 @@ else if (allFreeRooms != null)
 {
     foreach (FreeRoom room in allFreeRooms)
     {
-        <h4> @room.name </h4>
-        <p>key: @room.key </p>
-        <p>id: @room.id </p>
-        <p>Shortname: @room.shortName </p>
-        <p>Frei ab: @room.freeFrom </p>
-        <p>Frei bis: @room.freeUntil </p>
+        <FluentCard>
+            <h4> @room.name </h4>
+            <p>key: @room.key </p>
+            <p>id: @room.id </p>
+            <p>Shortname: @room.shortName </p>
+            <p>Frei ab: @room.freeFrom </p>
+            <p>Frei bis: @room.freeUntil </p>
+            <FluentIcon Icon="@(Icons.Regular.Size24.Save)" />
+            <FluentEmoji Emoji="@(Emojis.Objects.Color.Default.Pill)" />
+        </FluentCard>
     }
 }
 
