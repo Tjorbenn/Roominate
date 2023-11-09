@@ -1,6 +1,8 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@using Microsoft.FluentUI.AspNetCore.Components.DesignTokens
 
+<!DOCTYPE html>
+<html lang="en">
+<FluentDesignSystemProvider AccentBaseColor="#2a8d05">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,5 +17,5 @@
     <Routes @rendermode="@InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>
 </body>
-
+</FluentDesignSystemProvider>
 </html>
