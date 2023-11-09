@@ -9,36 +9,38 @@
 @using System.Web
 @using Microsoft.Extensions.Http
 
+<FluentGrid Spacing="2" Justify="JustifyContent.FlexStart">
 @if (allFreeRooms == null)
 {
-    <h4>Kommuniziere mit UnivIS...</h4>
-    <FluentProgressRing></FluentProgressRing>
-
-    <FluentCard Class="card-padding">
-        <FluentSkeleton Shape="SkeletonShape.Circle" Shimmer="true"></FluentSkeleton>
-        <FluentSkeleton Height="10px" Shimmer="true"></FluentSkeleton>
-        <FluentSkeleton Height="10px" Shimmer="true"></FluentSkeleton>
-        <FluentSkeleton Height="10px" Shimmer="true"></FluentSkeleton>
-        <FluentSkeleton Width="75px" Height="30px" Shimmer="true"></FluentSkeleton>
-    </FluentCard>
+    <FluentGridItem>
+        <h4>Kommuniziere mit UnivIS...</h4>
+        <FluentProgressRing></FluentProgressRing>
+    </FluentGridItem>
 }
 
 else if (allFreeRooms != null)
 {
-    foreach (FreeRoom room in allFreeRooms)
-    {
-        <FluentCard>
-            <h4> @room.name </h4>
-            <p>key: @room.key </p>
-            <p>id: @room.id </p>
-            <p>Shortname: @room.shortName </p>
-            <p>Frei ab: @room.freeFrom </p>
-            <p>Frei bis: @room.freeUntil </p>
-            <FluentIcon Icon="@(Icons.Regular.Size24.Save)" />
-            <FluentEmoji Emoji="@(Emojis.Objects.Color.Default.Pill)" />
-        </FluentCard>
-    }
+        foreach (FreeRoom room in allFreeRooms)
+        {
+            <FluentGridItem>
+                <FluentCard Height="10em" Width="35em" Style="position: relative">
+                    <div style="position: absolute; top: 10px; left: 10px">
+                        <FluentEmoji Emoji="Emojis.Objects.Color.Default.Door"></FluentEmoji>
+                    </div>
+                    <div style="position: absolute; top: 10px; right: 10px">
+                        <FluentLabel Typo="Typography.PaneHeader"> @room.name </FluentLabel>
+                    </div>
+                    <div style="position: absolute; margin-top: 30px; right: 15px">
+                        <FluentLabel Typo="Typography.Body">@room.shortName</FluentLabel>
+                    </div>
+                    <div style="position: absolute; bottom: 10px; left: 10px">
+                            <FluentLabel Typo="Typography.Body"><b>Frei bis: @room.freeUntil.ToString("HH:mm") Uhr</b></FluentLabel>
+                    </div>
+                </FluentCard>
+            </FluentGridItem>
+        }
 }
+</FluentGrid>
 
 @code
 {
@@ -125,6 +127,11 @@ else if (allFreeRooms != null)
         List<Room> allRooms = await GetAllRooms();
         List<FreeRoom> allFreeRooms = new List<FreeRoom>();
 
+        TimeSpan startTime = new TimeSpan(00, 00, 00);
+        TimeSpan endTime = new TimeSpan(23, 59, 59);
+        DateTime dayStart = date.Date + startTime;
+        DateTime dayEnd = date.Date + endTime;
+
         foreach (Room room in allRooms)
         {
             List<Allocation> roomAllAllocations = await GetAllocationsOnDay(room, date);
@@ -155,6 +162,16 @@ else if (allFreeRooms != null)
                             next = allocation.startTime;
                         }
                     }
+
+                    if (last < dayStart)
+                    {
+                        last = dayStart;
+                    }
+                    if (next > dayEnd)
+                    {
+                        next = dayEnd;
+                    }
+
                     FreeRoom freeRoom = new FreeRoom(room, last, next);
                     allFreeRooms.Add(freeRoom);
                 }
