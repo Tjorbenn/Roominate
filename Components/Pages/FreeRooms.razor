@@ -9,18 +9,19 @@
 @using System.Web
 @using Microsoft.Extensions.Http
 
-<FluentGrid Spacing="2" Justify="JustifyContent.FlexStart">
+
 @if (allFreeRooms == null)
 {
-    <FluentGridItem>
+    <div style="position: absolute; top: 50%; left: 50%;">
         <h4>Kommuniziere mit UnivIS...</h4>
-        <FluentProgressRing></FluentProgressRing>
-    </FluentGridItem>
+        <FluentProgress></FluentProgress>
+    </div>   
 }
 
 else if (allFreeRooms != null)
 {
-        foreach (FreeRoom room in allFreeRooms)
+    <FluentGrid Spacing="2" Justify="JustifyContent.FlexStart">
+        @foreach (FreeRoom room in allFreeRooms)
         {
             <FluentGridItem>
                 <FluentCard Height="10em" Width="35em" Style="position: relative">
@@ -39,8 +40,8 @@ else if (allFreeRooms != null)
                 </FluentCard>
             </FluentGridItem>
         }
+    </FluentGrid>
 }
-</FluentGrid>
 
 @code
 {
@@ -60,8 +61,16 @@ else if (allFreeRooms != null)
     public async Task<XDocument> GetXml(string endpoint)
     {
         var client = new HttpClient();
-        var response = await client.GetAsync(endpoint);
-        response.EnsureSuccessStatusCode();
+        HttpResponseMessage response = new HttpResponseMessage();
+        try
+        {
+            response = await client.GetAsync(endpoint);
+            response.EnsureSuccessStatusCode();
+        }
+        catch
+        {
+            throw new Exception("Eine Anfrage bei UnivIS ist fehlgeschlagen! Bitte erneut versuchen.");
+        }
         var xmlString = await response.Content.ReadAsStringAsync();
         if (isValidXml(xmlString))
         {
