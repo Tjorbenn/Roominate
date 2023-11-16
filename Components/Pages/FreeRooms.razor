@@ -9,7 +9,7 @@
 @using System.Web
 @using Microsoft.Extensions.Http
 
-<FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+<FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" Style="margin-bottom: 2em">
     <FluentButton Id="settingsButton" IconStart="@(new Icons.Regular.Size16.Settings())" Appearance="Appearance.Accent" @onclick="() => _popover = !_popover">
             Einstellungen
         </FluentButton>
