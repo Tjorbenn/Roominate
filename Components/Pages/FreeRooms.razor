@@ -9,49 +9,90 @@
 @using System.Web
 @using Microsoft.Extensions.Http
 
+<div class="dateTimeSelect">
+    <FluentStack Orientation="Orientation.Vertical">
+        <FluentStack Orientation="Orientation.Vertical">
+            <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+                <FluentCalendar Value="@selectedDate" />
+                <FluentTimePicker Value="@selectedTime" />
+            </FluentStack>
+        </FluentStack>
+        <FluentStack Orientation="Orientation.Horizontal">
+            <FluentButton IconStart="@(new Icons.Regular.Size16.Door())"
+                          Appearance="Appearance.Accent" OnClick="StartFreeRooms">
+                Zeige freie Räume
+            </FluentButton>
+            <FluentButton IconStart="@(new Icons.Regular.Size16.Delete())"
+                          Appearance="Appearance.Accent" OnClick="ClearRooms">
+                Lösche Räume
+            </FluentButton>
+        </FluentStack>
+    </FluentStack>
+</div>
 
-@if (allFreeRooms == null)
+@if (noData == false)
 {
-    <div style="position: absolute; top: 50%; left: 50%;">
-        <h4>Kommuniziere mit UnivIS...</h4>
-        <FluentProgress></FluentProgress>
-    </div>   
-}
-
-else if (allFreeRooms != null)
-{
-    <FluentGrid Spacing="2" Justify="JustifyContent.FlexStart">
-        @foreach (FreeRoom room in allFreeRooms)
+    <div class="univis">
+        @if (waiting)
         {
-            <FluentGridItem>
-                <FluentCard Height="10em" Width="35em" Style="position: relative">
-                    <div style="position: absolute; top: 10px; left: 10px">
-                        <FluentEmoji Emoji="Emojis.Objects.Color.Default.Door"></FluentEmoji>
-                    </div>
-                    <div style="position: absolute; top: 10px; right: 10px">
-                        <FluentLabel Typo="Typography.PaneHeader"> @room.name </FluentLabel>
-                    </div>
-                    <div style="position: absolute; margin-top: 30px; right: 15px">
-                        <FluentLabel Typo="Typography.Body">@room.shortName</FluentLabel>
-                    </div>
-                    <div style="position: absolute; bottom: 10px; left: 10px">
-                            <FluentLabel Typo="Typography.Body"><b>Frei bis: @room.freeUntil.ToString("HH:mm") Uhr</b></FluentLabel>
-                    </div>
-                </FluentCard>
-            </FluentGridItem>
+            <div style="position: absolute; top: 50%; left: 50%;">
+                <h4>Kommuniziere mit UnivIS...</h4>
+                <FluentProgress></FluentProgress>
+            </div>
         }
-    </FluentGrid>
+
+        else if (waiting == false && allFreeRooms != null)
+        {
+            <FluentGrid Spacing="2" Justify="JustifyContent.FlexStart">
+                @foreach (FreeRoom room in allFreeRooms)
+                {
+                    <FluentGridItem>
+                        <FluentCard Height="10em" Width="35em" Style="position: relative">
+                            <div style="position: absolute; top: 10px; left: 10px">
+                                <FluentEmoji Emoji="Emojis.Objects.Color.Default.Door"></FluentEmoji>
+                            </div>
+                            <div style="position: absolute; top: 10px; right: 10px">
+                                <FluentLabel Typo="Typography.PaneHeader"> @room.name </FluentLabel>
+                                </div>
+                                <div style="position: absolute; margin-top: 30px; right: 15px">
+                                    <FluentLabel Typo="Typography.Body">@room.shortName</FluentLabel>
+                                </div>
+                                <div style="position: absolute; bottom: 10px; left: 10px">
+                                    <FluentLabel Typo="Typography.Body"><b>Frei bis: @room.freeUntil.ToString("HH:mm") Uhr</b></FluentLabel>
+                            </div>
+                        </FluentCard>
+                    </FluentGridItem>
+                }
+            </FluentGrid>
+        }
+    </div>
 }
 
 @code
 {
 
+    bool waiting;
+    bool noData;
+
+    DateTime selectedDate;
+    DateTime selectedTime;
+
     private List<FreeRoom>? allFreeRooms;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        DateTime date = DateTime.Now;
-        allFreeRooms = await GetAllFreeRooms(date);
+        noData = true;
+        selectedDate = DateTime.Now;
+        selectedTime = DateTime.Now;
+    }
+
+    public async Task StartFreeRooms()
+    {
+        waiting = true;
+        noData = false;
+        DateTime combined = selectedDate.Date + selectedTime.TimeOfDay;
+        allFreeRooms = await GetAllFreeRooms(combined);
+        waiting = false;
     }
 
     public static string allRoomsEndpoint = "https://univis.uni-luebeck.de/form?__s=1&dsc=anew%2Funihd&donedef=1&search=tel&submitimg-Search=anew%2Funihd-topnav%3Aanew%2Funihd%3Asearch&semto=2023w&submitimg-Semester=anew%2Funihd-topnav%3Aanew%2Funihd%3Asetsem&setsem_jump=anew%2Ftimedout&done-anew%2Ftimedout%3Adoit=++Trotzdem+versuchen++&%3A%3Atarget=anew%2Fxml%3Adoit&db=Room&level=1&sem=2023w&keys=zentr%2Fzentr%2Fzentr%2Fam1%2C%2Ftests2%2C%2Ftest3%2C%2Fam4%2C%2Famfoye%2C%2Ftesta1%2C%2Ftests2_4%2C%2Fams3%2C%2Fams4%2C%2Fc1s01%2C%2Fc1s02%2C%2Fc1s03%2C%2Fc1s04%2C%2Fc2s01%2C%2Fc2s02%2C%2Fc2s03%2C%2Fc2s04%2C%2Fc3s01%2C%2Fc3s02%2C%2Fc4s01%2C%2Fc4s02%2C%2Fc4s03%2C%2Fc4s04%2C%2Ffoyerv%2C%2F1%2C%2F4%2C%2F4a%2C%2Fkt%2C%2Fmfc9s0%2C%2Fmfc9s0_4%2C%2Fmfc9s0_32%2C%2Fmfc9s0_2%2C%2Fmfc9s0_5%2C%2Fmfc9s0_1%2C%2Fmfc9s0_9%2C%2Foasync%2C%2Fosync%2C%2Fr60zkl%2C%2Fs3b%2C%2Fs11c%2C%2Fs20c%2C%2Fsemvor%2C%2Fkeller%2C%2Ft1%2C%2Ffoyert%2C%2Fts1%2C%2Fts2%2C%2Fv1%2C%2Fv2%2C%2Fz12%2C%2Fz3&anonymous=1&__e=667";
@@ -187,6 +228,12 @@ else if (allFreeRooms != null)
             }
         }
         return allFreeRooms;
+    }
+
+    public void ClearRooms()
+    {
+        noData = true;
+        allFreeRooms = null;
     }
 
     public class Room

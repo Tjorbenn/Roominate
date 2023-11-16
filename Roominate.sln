@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34227.203
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roominate", "Roominate.csproj", "{B984C527-8856-40C8-BBA6-019940BF774B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Roominate", "Roominate.csproj", "{B984C527-8856-40C8-BBA6-019940BF774B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
