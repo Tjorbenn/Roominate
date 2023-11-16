@@ -9,26 +9,32 @@
 @using System.Web
 @using Microsoft.Extensions.Http
 
-<div class="dateTimeSelect">
-    <FluentStack Orientation="Orientation.Vertical">
+<FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+    <FluentButton Id="settingsButton" IconStart="@(new Icons.Regular.Size16.Settings())" Appearance="Appearance.Accent" @onclick="() => _popover = !_popover">
+            Einstellungen
+        </FluentButton>
+        <FluentButton IconStart="@(new Icons.Regular.Size16.Door())"
+                      Appearance="Appearance.Accent" OnClick="StartFreeRooms">
+            Zeige freie Räume
+        </FluentButton>
+        <FluentButton IconStart="@(new Icons.Regular.Size16.Delete())"
+                      Appearance="Appearance.Accent" OnClick="ClearRooms">
+            Lösche Räume
+        </FluentButton>
+</FluentStack>
+
+<FluentPopover AnchorId="settingsButton" @bind-Open="_popover" >
+    <Header>Einstellungen</Header>
+    <Body>
         <FluentStack Orientation="Orientation.Vertical">
             <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
-                <FluentCalendar Value="@selectedDate" />
-                <FluentTimePicker Value="@selectedTime" />
+                <FluentCalendar @bind-Value="@selectedDate" />
+                <FluentTimePicker @bind-Value="@selectedTime" />
             </FluentStack>
         </FluentStack>
-        <FluentStack Orientation="Orientation.Horizontal">
-            <FluentButton IconStart="@(new Icons.Regular.Size16.Door())"
-                          Appearance="Appearance.Accent" OnClick="StartFreeRooms">
-                Zeige freie Räume
-            </FluentButton>
-            <FluentButton IconStart="@(new Icons.Regular.Size16.Delete())"
-                          Appearance="Appearance.Accent" OnClick="ClearRooms">
-                Lösche Räume
-            </FluentButton>
-        </FluentStack>
-    </FluentStack>
-</div>
+    </Body>
+    <Footer></Footer>
+</FluentPopover>
 
 @if (noData == false)
 {
@@ -73,24 +79,30 @@
 
     bool waiting;
     bool noData;
+    bool showSettings;
+    bool _popover;
 
-    DateTime selectedDate;
-    DateTime selectedTime;
+    DateTime? selectedDate;
+    DateTime? selectedTime;
+
+    DateTime combined = DateTime.Now;
 
     private List<FreeRoom>? allFreeRooms;
 
     protected override void OnInitialized()
     {
-        noData = true;
         selectedDate = DateTime.Now;
         selectedTime = DateTime.Now;
+        noData = true;
     }
 
     public async Task StartFreeRooms()
     {
         waiting = true;
         noData = false;
-        DateTime combined = selectedDate.Date + selectedTime.TimeOfDay;
+        DateTime sDate = selectedDate ?? DateTime.Now;
+        DateTime sTime = selectedTime ?? DateTime.Now;
+        combined = sDate.Date + sTime.TimeOfDay;
         allFreeRooms = await GetAllFreeRooms(combined);
         waiting = false;
     }
